@@ -2,6 +2,7 @@ import Lean
 
 open Lean
 open Lean.Meta
+open Lean.PrettyPrinter
 
 structure TheoremData where
   name : String
@@ -46,8 +47,8 @@ def extractTheorems (targetModNames : Array Name) : MetaM Unit := do
             let doc ← findDocString? env name
             let docStr := doc.getD ""
 
-            let typeStr := toString val.type
-            let valStr := toString val.value
+            let typeStr := (← PrettyPrinter.ppExpr val.type).pretty
+            let valStr := (← PrettyPrinter.ppExpr val.value).pretty
 
             let data : TheoremData := {
               name := nameStr,
