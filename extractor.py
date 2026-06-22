@@ -2,6 +2,7 @@ import json
 import subprocess
 import orjson
 import os
+import threading
 from typing import Generator, Dict, List
 from config import VeanConfig
 
@@ -23,6 +24,10 @@ def get_dynamic_modules(config: VeanConfig) -> List[str]:
     return sorted(modules)
 
 
+class TimeoutError(Exception):
+    pass
+
+
 def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Dict, None, None]:
     cmd = ['lake', 'exe', 'extractor'] + modules
     process = subprocess.Popen(
@@ -32,6 +37,10 @@ def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Di
         stderr=subprocess.PIPE,
         text=True
     )
+
+    timer = threading.Timer(config.extraction.timeout_seconds, process.kill)
+    timer.start()
+
     try:
         for line in process.stdout:
             line = line.strip()
@@ -42,12 +51,16 @@ def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Di
             except orjson.JSONDecodeError:
                 continue
     finally:
+        timer.cancel()
         process.wait()
+        if process.returncode == -9:
+            raise TimeoutError(f"Batch timed out after {config.extraction.timeout_seconds}s")
         if process.returncode != 0:
             stderr_output = process.stderr.read() if process.stderr else ""
-            print(f"Warning: lake exe extractor exited with code {process.returncode}", file=__import__('sys').stderr)
+            import sys as _sys
+            print(f"Warning: lake exe extractor exited with code {process.returncode}", file=_sys.stderr)
             if stderr_output:
-                print(f"stderr: {stderr_output[:500]}", file=__import__('sys').stderr)
+                print(f"stderr: {stderr_output[:500]}", file=_sys.stderr)
 
 
 def load_progress(progress_file: str) -> set:
