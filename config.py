@@ -13,6 +13,7 @@ else:
 
 @dataclass
 class ExtractionConfig:
+    max_workers: int = 1
     batch_size: int = 50
     mathlib_path: str = "Extractor/.lake/packages/mathlib/Mathlib"
     blacklist: List[str] = field(
