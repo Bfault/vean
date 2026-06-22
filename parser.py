@@ -1,10 +1,12 @@
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
+
 import orjson
+from tqdm import tqdm
+
 from config import load_config
-from extractor import get_dynamic_modules, run_extraction_batch, load_progress, save_progress
 from enricher import enrich_entry
+from extractor import get_dynamic_modules, load_progress, run_extraction_batch, save_progress
 
 
 def process_batch(batch, config):
@@ -62,7 +64,13 @@ def run_pipeline():
                             if "total_theorems" in raw:
                                 exact_total = raw["total_theorems"]
                                 if exact_total > 0:
-                                    module_pbar = tqdm(total=exact_total, desc="↳ Theorems", position=1, leave=False, colour="blue")
+                                    module_pbar = tqdm(
+                                        total=exact_total,
+                                        desc="↳ Theorems",
+                                        position=1,
+                                        leave=False,
+                                        colour="blue",
+                                    )
                                 continue
 
                             if "name" in raw:

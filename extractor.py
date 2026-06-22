@@ -1,13 +1,15 @@
 import json
-import subprocess
-import orjson
 import os
+import subprocess
 import threading
-from typing import Generator, Dict, List
+from collections.abc import Generator
+
+import orjson
+
 from config import VeanConfig
 
 
-def get_dynamic_modules(config: VeanConfig) -> List[str]:
+def get_dynamic_modules(config: VeanConfig) -> list[str]:
     mathlib_path = config.extraction.mathlib_path
     if not os.path.exists(mathlib_path):
         raise FileNotFoundError(f"No Mathlib found at {mathlib_path}")
@@ -28,7 +30,7 @@ class TimeoutError(Exception):
     pass
 
 
-def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Dict, None, None]:
+def run_extraction_batch(modules: list[str], config: VeanConfig) -> Generator[dict, None, None]:
     cmd = ['lake', 'exe', 'extractor'] + modules
     process = subprocess.Popen(
         cmd,

@@ -1,6 +1,5 @@
 import sys
 from dataclasses import dataclass, field
-from typing import List
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -16,10 +15,10 @@ class ExtractionConfig:
     max_workers: int = 1
     batch_size: int = 50
     mathlib_path: str = "Extractor/.lake/packages/mathlib/Mathlib"
-    blacklist: List[str] = field(
+    blacklist: list[str] = field(
         default_factory=lambda: ["Testing", "Deprecated", "Tactic", "Util", "Lean"]
     )
-    noise_prefixes: List[str] = field(
+    noise_prefixes: list[str] = field(
         default_factory=lambda: [
             "Init.", "Core.", "Eq.", "Iff.", "And.", "Or.",
             "Not.", "True.", "False.", "Exists.",

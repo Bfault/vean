@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List
+
 from config import VeanConfig
 
 
@@ -10,7 +10,7 @@ def clean_content(text: str) -> str:
     return text
 
 
-def extract_dependencies(proof_text: str, thm_name: str, noise_prefixes: List[str]) -> List[str]:
+def extract_dependencies(proof_text: str, thm_name: str, noise_prefixes: list[str]) -> list[str]:
     all_deps = set(re.findall(r'\b[A-Z][a-zA-Z0-9_]*\.[a-zA-Z0-9_.]+\b', proof_text))
     return sorted([
         dep for dep in all_deps
@@ -18,7 +18,7 @@ def extract_dependencies(proof_text: str, thm_name: str, noise_prefixes: List[st
     ])
 
 
-def enrich_entry(raw: Dict, config: VeanConfig) -> Dict:
+def enrich_entry(raw: dict, config: VeanConfig) -> dict:
     thm_name = raw['name']
     raw_proof = raw.get('proof', '')
     proposition = raw.get('proposition', '')
