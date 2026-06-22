@@ -42,3 +42,8 @@ def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Di
                 continue
     finally:
         process.wait()
+        if process.returncode != 0:
+            stderr_output = process.stderr.read() if process.stderr else ""
+            print(f"Warning: lake exe extractor exited with code {process.returncode}", file=__import__('sys').stderr)
+            if stderr_output:
+                print(f"stderr: {stderr_output[:500]}", file=__import__('sys').stderr)
