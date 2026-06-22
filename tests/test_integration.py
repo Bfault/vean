@@ -1,6 +1,7 @@
-import subprocess
-import orjson
 import os
+import subprocess
+
+import orjson
 
 EXTRACTOR_DIR = "Extractor"
 
@@ -25,7 +26,7 @@ def test_extract_small_module():
     )
     assert result.returncode == 0, f"stderr: {result.stderr[:500]}"
 
-    lines = [l.strip() for l in result.stdout.split("\n") if l.strip()]
+    lines = [ln.strip() for ln in result.stdout.split("\n") if ln.strip()]
     assert len(lines) >= 2  # preflight + au moins 1 théorème
 
     # Première ligne = préflight
@@ -57,7 +58,7 @@ def test_extract_no_name_starts_with_underscore():
         text=True,
         timeout=120,
     )
-    lines = [l.strip() for l in result.stdout.split("\n") if l.strip()]
+    lines = [ln.strip() for ln in result.stdout.split("\n") if ln.strip()]
     for line in lines[1:]:
         entry = orjson.loads(line)
         assert not entry["name"].startswith("_"), f"Bad name: {entry['name']}"

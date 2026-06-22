@@ -1,4 +1,4 @@
-from config import VeanConfig, ExtractionConfig, ContentConfig, OutputConfig
+from config import ContentConfig, ExtractionConfig, VeanConfig
 
 
 def test_config_defaults():

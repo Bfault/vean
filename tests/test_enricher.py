@@ -1,5 +1,5 @@
-from enricher import clean_content, extract_dependencies, enrich_entry
 from config import VeanConfig
+from enricher import clean_content, enrich_entry, extract_dependencies
 
 
 def test_clean_content_removes_hygiene_names():
