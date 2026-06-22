@@ -1,0 +1,15 @@
+[extraction]
+batch_size = 50
+mathlib_path = "Extractor/.lake/packages/mathlib/Mathlib"
+blacklist = ["Testing", "Deprecated", "Tactic", "Util", "Lean"]
+noise_prefixes = ["Init.", "Core.", "Eq.", "Iff.", "And.", "Or.", "Not.", "True.", "False.", "Exists."]
+timeout_seconds = 300
+extractor_dir = "Extractor"
+
+[content]
+max_content_size = 100000
+max_field_size = 50000
+
+[output]
+dataset_file = "vean_dataset.jsonl"
+progress_file = ".vean_progress.json"
