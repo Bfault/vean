@@ -2,7 +2,7 @@ import time
 from tqdm import tqdm
 import orjson
 from config import load_config
-from extractor import get_dynamic_modules, run_extraction_batch
+from extractor import get_dynamic_modules, run_extraction_batch, load_progress, save_progress
 from enricher import enrich_entry
 
 
@@ -12,6 +12,9 @@ def run_pipeline():
     total_extracted = 0
 
     modules = get_dynamic_modules(config)
+    processed = load_progress(config.output.progress_file)
+    modules = [m for m in modules if m not in processed]
+    print(f"Reprise: {len(processed)} modules déjà traités, {len(modules)} restants")
     batch_size = config.extraction.batch_size
 
     print(f"Extracting {len(modules)} files (in batches of {batch_size})...\n")
@@ -24,24 +27,28 @@ def run_pipeline():
 
                 exact_total = None
                 module_pbar = None
+                try:
+                    for raw in run_extraction_batch(batch, config):
+                        if "total_theorems" in raw:
+                            exact_total = raw["total_theorems"]
+                            if exact_total > 0:
+                                module_pbar = tqdm(total=exact_total, desc="↳ Theorems", position=1, leave=False, colour="blue")
+                            continue
 
-                for raw in run_extraction_batch(batch, config):
-                    if "total_theorems" in raw:
-                        exact_total = raw["total_theorems"]
-                        if exact_total > 0:
-                            module_pbar = tqdm(total=exact_total, desc="↳ Theorems", position=1, leave=False, colour="blue")
-                        continue
-
-                    if "name" in raw:
-                        total_extracted += 1
-                        entry = enrich_entry(raw, config)
-                        f_out.write(orjson.dumps(entry) + b'\n')
-                        if module_pbar:
-                            module_pbar.update(1)
-
-                if module_pbar:
-                    module_pbar.close()
-                main_pbar.update(len(batch))
+                        if "name" in raw:
+                            total_extracted += 1
+                            entry = enrich_entry(raw, config)
+                            f_out.write(orjson.dumps(entry) + b'\n')
+                            if module_pbar:
+                                module_pbar.update(1)
+                except Exception as e:
+                    print(f"Erreur sur le lot {i//batch_size + 1}: {e}")
+                finally:
+                    if module_pbar:
+                        module_pbar.close()
+                    processed.update(batch)
+                    save_progress(config.output.progress_file, processed)
+                    main_pbar.update(len(batch))
 
     elapsed = time.time() - start_time
     print(f"\nPipeline completed! {total_extracted} theorems extracted in {elapsed:.2f} seconds.")

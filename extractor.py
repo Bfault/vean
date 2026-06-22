@@ -1,3 +1,4 @@
+import json
 import subprocess
 import orjson
 import os
@@ -47,3 +48,16 @@ def run_extraction_batch(modules: List[str], config: VeanConfig) -> Generator[Di
             print(f"Warning: lake exe extractor exited with code {process.returncode}", file=__import__('sys').stderr)
             if stderr_output:
                 print(f"stderr: {stderr_output[:500]}", file=__import__('sys').stderr)
+
+
+def load_progress(progress_file: str) -> set:
+    try:
+        with open(progress_file) as f:
+            return set(json.load(f))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return set()
+
+
+def save_progress(progress_file: str, modules: set):
+    with open(progress_file, 'w') as f:
+        json.dump(sorted(modules), f)
